@@ -16,6 +16,8 @@ let qStatus = false
 const queue = []
 let current
 
+~
+
 class Function {
     constructor(func, description, usage, modOnly) {
         this.execute = modOnly ? (msg, { config }) => modWare(msg, config, func) : func
@@ -119,9 +121,7 @@ const memberHandler = async msg => {
     msg.channel.send(`the current queue members are [${members.join(", ")}], queuing is ${qStatus ? "enabled" : "disabled"}`)
 }
 
-// TODO Finish
 const priorityHandler = async (msg, config) => {
-    //data.sort(function (x, y) { return x == first ? -1 : y == first ? 1 : 0; });
     if(!qStatus){
         queue.sort(member => member.isPriority ? 1 : -1)
         msg.channel.send(`Queue priority filter complete the queue is [${queue.map(member => member.nickName).join(", ")}]`)
