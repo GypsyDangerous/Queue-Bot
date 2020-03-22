@@ -16,6 +16,24 @@ let qStatus = false
 const queue = []
 let current
 
+class Function {
+    constructor(func, description, usage, modOnly) {
+        this.execute = modOnly ? (msg, { config }) => modWare(msg, config, func) : func
+        this.description = description
+        this.usage = usage
+        this.modOnly = modOnly
+    }
+}
+
+class QueueMember {
+    constructor(member, config){
+        this.id = member.id
+        this.isPriority = member.roles.cache.array().map(role => role.id).includes(config.priorityRole)
+        this.nickName = member.displayName
+    }
+}
+
+
 const modWare = (msg, config, cb) => {
     if(msg.member.permissions.any(config.ModPerms)){
         cb(msg, config)
@@ -51,7 +69,7 @@ const nextHandler = async (msg, config) => {
     }
     current = queue.shift()
     if (current) {
-        current = await msg.guild.members.fetch(current)
+        current = await msg.guild.members.fetch(current.id)
         const qnaChannel = msg.guild.channels
         if(qnaChannel.cache.array().find(ch => ch.id === config.QnAId).members.array().map(ch => ch.id).includes(current.id)){
             await current.roles.add(config.QnATalkId)
@@ -67,14 +85,14 @@ const nextHandler = async (msg, config) => {
     }
 }
 
-const joinHandler = async msg => {
+const joinHandler = async (msg, config) => {
     if (qStatus) {
-        const id = msg.author.id
-        if (queue.includes(id)) {
+        const member = new QueueMember(msg.member, config)
+        if (queue.includes(member)) {
             return await msg.reply("You are already in the queue")
         } else {
-            queue.push(id)
-            await msg.reply(stripIndents`You have been added to the queue, your position is ${queue.indexOf(id) + 1}
+            queue.push(member)
+            await msg.reply(stripIndents`You have been added to the queue, your position is ${queue.indexOf(member) + 1}
                     beware when it is your turn there will be a sudden loud noise`)
         }
     }
@@ -97,30 +115,16 @@ const resetHandler = async msg => {
 }
 
 const memberHandler = async msg => {
-    const members = []
-    for(let id of queue){
-        const member = await msg.guild.members.fetch(id)
-        members.push(member.displayName)
-    }
+    const members = queue.map(member => member.nickName)
     msg.channel.send(`the current queue members are [${members.join(", ")}], queuing is ${qStatus ? "enabled" : "disabled"}`)
 }
 
 // TODO Finish
 const priorityHandler = async (msg, config) => {
-
-    return msg.channel.send("Priority filter is incomplete")
-
     //data.sort(function (x, y) { return x == first ? -1 : y == first ? 1 : 0; });
     if(!qStatus){
-        console.log(config.priorityRoles)
-        const queueRoles = []
-        for(const id of queue){
-            const member = await msg.guild.members.fetch(id)
-            const roles = (member.roles.cache.array().map(role => role.id))
-            queueRoles.push(roles)
-        }
-        console.log(queueRoles)
-        msg.channel.send(`Queue priority filter complete the queue is [${queue.join(", ")}]`)
+        queue.sort(member => member.isPriority ? 1 : -1)
+        msg.channel.send(`Queue priority filter complete the queue is [${queue.map(member => member.nickName).join(", ")}]`)
     }else{
         msg.channel.send("Queue priority filter cannot be done while Queuing is enabled")
     }
@@ -149,15 +153,6 @@ const help = (msg, {args, config, functions}) => {
                 .setFooter("Queue Bot help")
             msg.channel.send(embed)
         }
-    }
-}
-
-class Function{
-    constructor(func, description, usage, modOnly){
-        this.execute = modOnly ? (msg, {config}) => modWare(msg, config, func) : func
-        this.description = description
-        this.usage = usage
-        this.modOnly = modOnly
     }
 }
 
