@@ -13,10 +13,12 @@ const {stripIndents} = require("common-tags")
 const { MessageEmbed } = require("discord.js")
 
 let qStatus = false
-const queue = []
+let queue = []
 let current
 
-~
+const IncludesArray = (arr1, arr2) => arr1.some(v => arr2.indexOf(v) >= 0)
+
+
 
 class Function {
     constructor(func, description, usage, modOnly) {
@@ -28,11 +30,15 @@ class Function {
 }
 
 class QueueMember {
-    constructor(member, config){
+    constructor(member, {config}){
         this.id = member.id
-        this.isPriority = member.roles.cache.array().map(role => role.id).includes(config.priorityRole)
+        this.isPriority = IncludesArray(member.roles.cache.array().map(role => role.id), config.priorityRoles)
         this.nickName = member.displayName
     }
+}
+
+QueueMember.prototype.toString = function memberToString(){
+    return this.nickName
 }
 
 
@@ -117,14 +123,13 @@ const resetHandler = async msg => {
 }
 
 const memberHandler = async msg => {
-    const members = queue.map(member => member.nickName)
-    msg.channel.send(`the current queue members are [${members.join(", ")}], queuing is ${qStatus ? "enabled" : "disabled"}`)
+    msg.channel.send(`the current queue members are [${queue.join(", ")}], queuing is ${qStatus ? "enabled" : "disabled"}`)
 }
 
 const priorityHandler = async (msg, config) => {
     if(!qStatus){
-        queue.sort(member => member.isPriority ? 1 : -1)
-        msg.channel.send(`Queue priority filter complete the queue is [${queue.map(member => member.nickName).join(", ")}]`)
+        queue.sort(member => member.isPriority ? -1 : 1)
+        msg.channel.send(`Queue priority filter complete the queue is [${queue.join(", ")}]`)
     }else{
         msg.channel.send("Queue priority filter cannot be done while Queuing is enabled")
     }
@@ -133,7 +138,6 @@ const priorityHandler = async (msg, config) => {
 const help = (msg, {args, config, functions}) => {
     if(args.length === 0){
         const available = (msg.member.permissions.any(config.ModPerms)) ? Object.keys(functions) : Object.keys(functions).filter(key => !functions[key].modOnly)
-        console.log(available)
         const embed = new MessageEmbed()
             .setTitle("Queue system")
             .addField("Description", "This bot is used to manage a queue of users for a discord live event, this allows the moderators to easily control the users in the chat and only allow one user to speak at time")
