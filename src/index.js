@@ -16,7 +16,7 @@ client.once("ready", async () => {
     console.log("Queue Bot Online")
 })
 
-client.login(process.env.BOT_TOKEN
+client.login(process.env.BOT_TOKEN)
 
 
 client.on("message", msg => commandHandler(msg, client, configFile)) 
