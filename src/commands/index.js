@@ -1,12 +1,9 @@
 
 const qHandler = require("./qHandler")
 
-
-
 const functions =  {
         "q": qHandler,
     }
-
 
 module.exports = (msg, client, config) => {
     if(msg.author.bot) return

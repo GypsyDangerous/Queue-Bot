@@ -128,7 +128,7 @@ const resetHandler = async msg => {
 }
 
 const memberHandler = async (msg, config) => {
-    await msg.channel.send(`the current queue members are [${queue.slice(0, config.displayLimit).join(", ")}${queue.length > config.displayLimit ? " + " + (queue.length - config.displayLimit) : "" }], queueing is ${qStatus ? "enabled" : "disabled"}`)
+    await msg.channel.send(`the current queue members are [${queue.map(member => member.nickName).slice(0, config.displayLimit).join(", ")}${queue.length > config.displayLimit ? " + " + (queue.length - config.displayLimit) : "" }], queueing is ${qStatus ? "enabled" : "disabled"}`)
 }
 
 const priorityHandler = async (msg, config) => {
