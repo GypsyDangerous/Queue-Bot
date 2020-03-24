@@ -10,7 +10,7 @@ const functions =  {
 
 module.exports = (msg, client, config) => {
     if(msg.author.bot) return
-    // if (msg.channel.id !== config.botTalkId) return
+    if (msg.channel.id !== config.botTalkId) return
     const {
         prefix
     } = config
