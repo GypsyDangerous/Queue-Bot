@@ -147,7 +147,6 @@ const priorityHandler = async (msg, config) => {
 
 const help = async (msg, {args, config, functions}) => {
     if(args.length === 0){
-        
         const available = hasPermission(msg.member, config.ModPerms) ? Object.keys(functions) : Object.keys(functions).filter(key => !functions[key].modOnly)
         const embed = new MessageEmbed()
             .setTitle("Queue system")
