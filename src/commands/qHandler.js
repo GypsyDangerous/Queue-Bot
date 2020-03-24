@@ -107,6 +107,8 @@ const joinHandler = async (msg, config) => {
             await msg.reply(stripIndents`You have been added to the queue, your position is ${queue.indexOf(member) + 1}
                     beware when it is your turn there will be a sudden loud noise`)
         }
+    }else{
+        msg.channel.send("Queueing is currently disabled")
     }
 }
 
