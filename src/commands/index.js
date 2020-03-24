@@ -1,5 +1,7 @@
 
 const qHandler = require("./qHandler")
+const moment = require("moment");
+require("moment-duration-format");
 
 const functions =  {
         "q": qHandler,
