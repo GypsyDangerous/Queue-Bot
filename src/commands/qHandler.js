@@ -12,9 +12,14 @@ status: returns users position in the queue
 const {stripIndents} = require("common-tags")
 const { MessageEmbed } = require("discord.js")
 const { hasPermission } = require("../functions")
+const path = require("path")
+const fs = require("fs")
+
+const Qpath = path.join(__dirname, "..", "..", "queue.json")
+
 
 let qStatus = false
-let queue = []
+let queue = JSON.parse(fs.readFileSync(Qpath))
 let current
 
 const IncludesArray = (arr1, arr2) => arr1.some(v => arr2.indexOf(v) >= 0)
@@ -193,7 +198,13 @@ functions.clear = functions.reset
 module.exports = async (msg, {args, config}) => {
     const command = args.shift()
     const func = functions[command]
-    if(Object.keys(functions).includes(command)){
-        func.execute(msg, {args, config, functions})
+    try{
+        if(Object.keys(functions).includes(command)) {
+            queue = JSON.parse(fs.readFileSync(Qpath))
+            func.execute(msg, {args, config, functions})
+            fs.writeFileSync(Qpath, JSON.stringify(queue))
+        }
+    }catch(err){
+        msg.channel.send("An error occured")
     }
 }
