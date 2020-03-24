@@ -15,7 +15,8 @@ module.exports = {
 
     capitalize: s => s.charAt(0).toUpperCase() + s.slice(1),
     ArrayAny,
-    hasPermission: (member, perms) => {
-        return ArrayAny(member.permissions.toArray(), perms)
+    hasPermission: (member, perms=[], roles=[]) => {
+        const memberRoles = member.roles.cache.array().map(r => r.id)
+        return ArrayAny(member.permissions.toArray(), perms) || ArrayAny(memberRoles, roles)
     }
 }

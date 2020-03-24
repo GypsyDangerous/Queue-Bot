@@ -48,7 +48,7 @@ QueueMember.prototype.toString = function memberToString(){
 
 
 const modWare = async (msg, config, cb) => {
-    if (hasPermission(msg.member, config.ModPerms)){
+    if (hasPermission(msg.member, config.ModPerms, config.ModRoles)){
         cb(msg, config)
     }else{
         await msg.reply("You don't have permission to use this command")
@@ -147,7 +147,7 @@ const priorityHandler = async (msg, config) => {
 
 const help = async (msg, {args, config, functions}) => {
     if(args.length === 0){
-        const available = hasPermission(msg.member, config.ModPerms) ? Object.keys(functions) : Object.keys(functions).filter(key => !functions[key].modOnly)
+        const available = hasPermission(msg.member, config.ModPerms, config.ModRoles) ? Object.keys(functions) : Object.keys(functions).filter(key => !functions[key].modOnly)
         const embed = new MessageEmbed()
             .setTitle("Queue system")
             .addField("Description", "This bot is used to manage a queue of users for a discord live event, this allows the moderators to easily control the users in the chat and only allow one user to speak at time")
