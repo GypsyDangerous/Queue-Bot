@@ -5,7 +5,7 @@ require("moment-duration-format");
 
 const functions =  {
         "q": qHandler,
-        "uptime": async (msg, args, client) => await msg.channel.send("Uptime: " + moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]"))
+        "uptime": async (msg, {args, client}) => await msg.channel.send("Uptime: " + moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]"))
     }
 
 module.exports = (msg, client, config) => {
