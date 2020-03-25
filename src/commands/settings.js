@@ -22,5 +22,7 @@ module.exports = async (msg, {args, config}) => {
         msg.channel.send(stripIndents`The available settings are \`${Object.keys(available).join("`, `")}\`
         
         All settings must be set to id's not names`)
+    }else if(!command){
+        msg.channel.send(JSON.stringify(config, null, 2))
     }
 }
