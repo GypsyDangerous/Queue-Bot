@@ -23,6 +23,6 @@ module.exports = async (msg, {args, config}) => {
         
         All settings must be set to id's not names`)
     }else if(!command){
-        msg.channel.send(JSON.stringify(config, null, 2))
+        msg.channel.send(JSON.stringify(config, null, 4))
     }
 }
