@@ -33,7 +33,7 @@ module.exports = async (msg, {args, config}) => {
     const setting = available[command]
     if(Object.keys(available).includes(command)){
         config[setting] = value
-        fs.writeFileSync(configPath, JSON.stringify(config))
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 4))
     }else if(command === "help"){
         msg.channel.send(stripIndents`The available settings are \`${Object.keys(available).join("`, `")}\`
         
