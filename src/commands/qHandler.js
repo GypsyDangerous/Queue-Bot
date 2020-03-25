@@ -11,10 +11,11 @@ status: returns users position in the queue
 
 const {stripIndents} = require("common-tags")
 const { MessageEmbed } = require("discord.js")
-const { hasPermission } = require("../functions")
+const { hasPermission, ArrayAny, Function, QueueMember } = require("../functions")
 const path = require("path")
 const fs = require("fs")
 
+const configPath = path.join(__dirname, "..", "..", "config.json")
 const Qpath = path.join(__dirname, "..", "..", "queue.json")
 
 
@@ -22,40 +23,9 @@ let qStatus = false
 let queue = JSON.parse(fs.readFileSync(Qpath))
 let current
 
-const IncludesArray = (arr1, arr2) => arr1.some(v => arr2.indexOf(v) >= 0)
+const settings = require("./settings")
 
-
-class Function {
-    constructor(func, description, usage, modOnly) {
-        this.execute = modOnly ? (msg, { config }) => modWare(msg, config, func) : func
-        this.description = description
-        this.usage = usage
-        this.modOnly = modOnly
-    }
-}
-
-class QueueMember {
-    constructor(member, {config}){
-        this.id = member.id
-        this.isPriority = IncludesArray(member.roles.cache.array().map(role => role.id), config.priorityRoles)
-        this.nickName = member.displayName
-    }
-}
-
-QueueMember.prototype.toString = function memberToString(){
-    return this.nickName
-}
-
-
-const modWare = async (msg, config, cb) => {
-    if (hasPermission(msg.member, config.ModPerms, config.ModRoles)){
-        cb(msg, config)
-    }else{
-        await msg.reply("You don't have permission to use this command")
-    }
-}
-
-const toggleTalk = (current, config) => {
+const toggleTalk = (current, {config}) => {
     current.voice.setChannel(config.QID)
     setTimeout(() => current.voice.setChannel(config.QnAId), 200)
 }
@@ -74,10 +44,10 @@ const stopHandler = async msg => {
     await msg.channel.send("Queueing disabled, existing queue is saved")
 }
 
-const nextHandler = async (msg, config) => {
+const nextHandler = async (msg, {config}) => {
     if (current) {
         await current.roles.remove(config.QnATalkId)
-        toggleTalk(current, config)
+        toggleTalk(current, {config})
     }
     current = queue.shift()
     if (current) {
@@ -86,20 +56,20 @@ const nextHandler = async (msg, config) => {
         if(qnaChannel.cache.array().find(ch => ch.id === config.QnAId).members.array().map(ch => ch.id).includes(current.id)){
             await current.roles.add(config.QnATalkId)
             await msg.channel.send(`${current.user} you are up!`)
-            toggleTalk(current, config)
+            toggleTalk(current, {config})
         }else{
             msg.channel.send(`${current.user} you missed your turn because you weren't in the channel, feel free to rejoin the queue for another chance`)
             current = undefined
-            nextHandler(msg, config)
+            nextHandler(msg, {config})
         }
     } else {
         msg.channel.send("No more users in the queue")
     }
 }
 
-const joinHandler = async (msg, config) => {
+const joinHandler = async (msg, {config}) => {
     if (qStatus) {
-        const member = new QueueMember(msg.member, config)
+        const member = new QueueMember(msg.member, {config})
         if (queue.findIndex(current => current.id === member.id) >= 0) {
             return await msg.reply("You are already in the queue")
         } else {
@@ -129,17 +99,17 @@ const resetHandler = async msg => {
     msg.channel.send(`The Queue has been cleared, Queueing is still ${qStatus ? "enabled" : "disabled"}`)
 }
 
-const memberHandler = async (msg, config) => {
-    await msg.channel.send(`the current queue members are [${queue.map(member => member.nickName).slice(0, config.displayLimit).join(", ")}${queue.length > config.displayLimit ? " + " + (queue.length - config.displayLimit) : "" }], queueing is ${qStatus ? "enabled" : "disabled"}`)
+const memberHandler = async (msg, {config}) => {
+    await msg.channel.send(`the current queue members are [${queue.map(member => member.nickName).slice(0, {config}.displayLimit).join(", ")}${queue.length > config.displayLimit ? " + " + (queue.length - config.displayLimit) : "" }], queueing is ${qStatus ? "enabled" : "disabled"}`)
 }
 
-const priorityHandler = async (msg, config) => {
+const priorityHandler = async (msg, {config}) => {
     if(!qStatus){
         const priorityQueue = queue.filter(member => member.isPriority)
         const regularQueue = queue.filter(member => !member.isPriority)
         queue = [...priorityQueue, ...regularQueue]
         await msg.channel.send(`Queue priority filter complete`)
-        await memberHandler(msg, config)
+        await memberHandler(msg, {config})
     }else{
         await msg.channel.send("Queue priority filter cannot be done while Queueing is enabled")
     }
@@ -162,7 +132,7 @@ const help = async (msg, {args, config, functions}) => {
             const embed = new MessageEmbed()
                 .setTitle(args.join())
                 .addField("Description", func.description)
-                .addField("usage", config.prefix+func.usage, true)
+                .addField("usage", {config}.prefix+func.usage, true)
                 .addField("Moderator only", func.modOnly.toString(), true)
                 .setFooter("Queue Bot help")
             await msg.channel.send(embed)
@@ -190,22 +160,27 @@ const functions = {
     "join": new Function(joinHandler, "join the queue if you are not already in it", "q join", false),
     "status": new Function(statusHandler, "returns your current position in the queue", "q status", false),
     "leave": new Function(leaveHandler, "removes the sender from the queue", "q leave", false),
-    "help": new Function(help, "sends help messages for the general bot or specific commands", "q help", false)
+    "help": new Function(help, "sends help messages for the general bot or specific commands", "q help", false),
+    "settings": new Function(settings, "allows moderators to change settings on the fly", "q settings <setting> <value>", true)
 }
 
 functions.position = functions.status
 functions.clear = functions.reset
 
 module.exports = async (msg, {args, config}) => {
+
+    
     const command = args.shift()
     const func = functions[command]
     try{
         if(Object.keys(functions).includes(command)) {
+            const config = JSON.parse(fs.readFileSync(configPath))
             queue = JSON.parse(fs.readFileSync(Qpath))
             func.execute(msg, {args, config, functions})
             fs.writeFileSync(Qpath, JSON.stringify(queue))
         }
     }catch(err){
+        console.log(err)
         msg.channel.send("An error occured")
     }
 }

@@ -3,6 +3,7 @@ const qHandler = require("./qHandler")
 const moment = require("moment");
 require("moment-duration-format");
 
+
 const functions =  {
         "q": qHandler,
         "uptime": async (msg, {args, client}) => await msg.channel.send("Uptime: " + moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]"))
@@ -10,7 +11,8 @@ const functions =  {
 
 module.exports = (msg, client, config) => {
     if(msg.author.bot) return
-    if (msg.channel.id !== config.botTalkId) return
+    // if (msg.channel.id !== config.botTalkId) return
+
     const {
         prefix
     } = config
