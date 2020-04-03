@@ -19,4 +19,4 @@ client.once("ready", async () => {
 client.login(process.env.BOT_TOKEN)
 
 
-client.on("message", msg => commandHandler(msg, client, configFile)
+client.on("message", msg => commandHandler(msg, client, configFile))

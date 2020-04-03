@@ -9,7 +9,7 @@ return ArrayAny(member.permissions.toArray(), perms) || ArrayAny(memberRoles, ro
 
 const modWare = async (msg, {config, args}, cb) => {
     if (hasPermission(msg.member, config.ModPerms, config.ModRoles)) {
-        cb(msg, {config, args})
+        await cb(msg, {config, args})
     } else {
         await msg.reply("You don't have permission to use this command")
     }
@@ -17,7 +17,7 @@ const modWare = async (msg, {config, args}, cb) => {
 
 class Function {
     constructor(func, description, usage, modOnly) {
-        this.execute = modOnly ? (msg, { config, args }) => modWare(msg, {config, args}, func) : func
+        this.execute = modOnly ? async (msg, { config, args }) => await modWare(msg, {config, args}, func) : func
         this.description = description
         this.usage = usage
         this.modOnly = modOnly

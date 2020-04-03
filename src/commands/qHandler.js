@@ -35,7 +35,7 @@ const startHandler = async msg =>{
         qStatus = true
         await msg.channel.send("Queue started!")
     } else {
-        return await msg.channel.send("Queue already started!")
+        await msg.channel.send("Queue already started!")
     }
 }
 
@@ -175,7 +175,6 @@ module.exports = async (msg, {args, config}) => {
             const config = JSON.parse(fs.readFileSync(configPath)) // load the config file
             queue = JSON.parse(fs.readFileSync(Qpath)) // load the cached queue
             await func.execute(msg, {args, config, functions}) // execute the function
-            await functions.members.execute(msg, {config})
             fs.writeFileSync(Qpath, JSON.stringify(queue)) // write the queue to the cache
         }
     }catch(err){
