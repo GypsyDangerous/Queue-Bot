@@ -175,7 +175,7 @@ module.exports = async (msg, {args, config}) => {
             const config = JSON.parse(fs.readFileSync(configPath)) // load the config file
             queue = JSON.parse(fs.readFileSync(Qpath)) // load the cached queue
             await func.execute(msg, {args, config, functions}) // execute the function
-            await functions.members(msg, {config})
+            await functions.members.execute(msg, {config})
             fs.writeFileSync(Qpath, JSON.stringify(queue)) // write the queue to the cache
         }
     }catch(err){
