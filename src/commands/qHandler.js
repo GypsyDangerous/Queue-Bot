@@ -174,8 +174,8 @@ module.exports = async (msg, {args, config}) => {
         if(Object.keys(functions).includes(command)) {
             const config = JSON.parse(fs.readFileSync(configPath)) // load the config file
             queue = JSON.parse(fs.readFileSync(Qpath)) // load the cached queue
-            func.execute(msg, {args, config, functions}) // execute the function
-            msg.channel.send(JSON.stringify(queue))
+            await func.execute(msg, {args, config, functions}) // execute the function
+            await functions.members()
             fs.writeFileSync(Qpath, JSON.stringify(queue)) // write the queue to the cache
         }
     }catch(err){
