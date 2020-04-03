@@ -180,6 +180,6 @@ module.exports = async (msg, {args, config}) => {
         }
     }catch(err){
         console.log(err)
-        msg.channel.send("An error occured")
+        msg.channel.send("An error occured", err.message)
     }
 }
