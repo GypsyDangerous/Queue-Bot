@@ -20,7 +20,7 @@ const Qpath = path.join(__dirname, "..", "..", "queue.json")
 
 
 let qStatus = false
-let queue = JSON.parse(fs.readFileSync(Qpath))
+let queue = []
 let current
 
 const settings = require("./settings")
@@ -172,10 +172,11 @@ module.exports = async (msg, {args, config}) => {
     const func = functions[command]
     try{
         if(Object.keys(functions).includes(command)) {
-            const config = JSON.parse(fs.readFileSync(configPath))
-            queue = JSON.parse(fs.readFileSync(Qpath))
-            func.execute(msg, {args, config, functions})
-            fs.writeFileSync(Qpath, JSON.stringify(queue))
+            const config = JSON.parse(fs.readFileSync(configPath)) // load the config file
+            queue = JSON.parse(fs.readFileSync(Qpath)) // load the cached queue
+            func.execute(msg, {args, config, functions}) // execute the function
+            msg.channel.send(queue)
+            fs.writeFileSync(Qpath, JSON.stringify(queue)) // write the queue to the cache
         }
     }catch(err){
         console.log(err)
