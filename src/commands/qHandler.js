@@ -156,7 +156,7 @@ const functions = {
     "next": new Function(nextHandler, "goes to the next user in the queue", "q next", true),
     "reset": new Function(resetHandler, "clears the queue", "q reset", true),
     "members": new Function(memberHandler, "returns a list of all the people in the queue and the queueing status", "q members", true),
-    "priority": new Function(priorityHandler, "filters priority roles to the front of the queue 'Incomplete'", "q priority", true),
+    "priority": new Function(priorityHandler, "filters priority roles to the front of the queue", "q priority", true),
     "join": new Function(joinHandler, "join the queue if you are not already in it", "q join", false),
     "status": new Function(statusHandler, "returns your current position in the queue", "q status", false),
     "leave": new Function(leaveHandler, "removes the sender from the queue", "q leave", false),
@@ -168,8 +168,6 @@ functions.position = functions.status
 functions.clear = functions.reset
 
 module.exports = async (msg, {args, config}) => {
-
-    
     const command = args.shift()
     const func = functions[command]
     try{
